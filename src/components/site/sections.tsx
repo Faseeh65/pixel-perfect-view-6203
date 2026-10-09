@@ -254,11 +254,15 @@ export function FAQ() {
     })),
   };
 
+  const safeJsonLd = JSON.stringify(faqSchema)
+    .replace(/</g, "\\u003c")
+    .replace(/>/g, "\\u003e");
+
   return (
     <section className="section-pad">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd }}
       />
       <div className="container-site">
         <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />

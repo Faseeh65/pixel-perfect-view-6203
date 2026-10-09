@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://printzy.pk/sitemap.xml
+Sitemap: https://printzy.site/sitemap.xml

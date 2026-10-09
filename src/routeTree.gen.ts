@@ -15,8 +15,10 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as GalleryRouteImport } from './routes/gallery'
 import { Route as HowItWorksRouteImport } from './routes/how-it-works'
 import { Route as IndustriesRouteImport } from './routes/industries'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProductsRouteImport } from './routes/products'
 import { Route as QuoteRouteImport } from './routes/quote'
+import { Route as TermsRouteImport } from './routes/terms'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -48,6 +50,11 @@ const IndustriesRoute = IndustriesRouteImport.update({
   path: '/industries',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProductsRoute = ProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -58,6 +65,11 @@ const QuoteRoute = QuoteRouteImport.update({
   path: '/quote',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,8 +78,10 @@ export interface FileRoutesByFullPath {
   '/gallery': typeof GalleryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/industries': typeof IndustriesRoute
+  '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRoute
   '/quote': typeof QuoteRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -76,8 +90,10 @@ export interface FileRoutesByTo {
   '/gallery': typeof GalleryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/industries': typeof IndustriesRoute
+  '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRoute
   '/quote': typeof QuoteRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -87,8 +103,10 @@ export interface FileRoutesById {
   '/gallery': typeof GalleryRoute
   '/how-it-works': typeof HowItWorksRoute
   '/industries': typeof IndustriesRoute
+  '/privacy': typeof PrivacyRoute
   '/products': typeof ProductsRoute
   '/quote': typeof QuoteRoute
+  '/terms': typeof TermsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -99,8 +117,10 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/how-it-works'
     | '/industries'
+    | '/privacy'
     | '/products'
     | '/quote'
+    | '/terms'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -109,8 +129,10 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/how-it-works'
     | '/industries'
+    | '/privacy'
     | '/products'
     | '/quote'
+    | '/terms'
   id:
     | '__root__'
     | '/'
@@ -119,8 +141,10 @@ export interface FileRouteTypes {
     | '/gallery'
     | '/how-it-works'
     | '/industries'
+    | '/privacy'
     | '/products'
     | '/quote'
+    | '/terms'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -130,8 +154,10 @@ export interface RootRouteChildren {
   GalleryRoute: typeof GalleryRoute
   HowItWorksRoute: typeof HowItWorksRoute
   IndustriesRoute: typeof IndustriesRoute
+  PrivacyRoute: typeof PrivacyRoute
   ProductsRoute: typeof ProductsRoute
   QuoteRoute: typeof QuoteRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -178,6 +204,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndustriesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/products': {
       id: '/products'
       path: '/products'
@@ -192,6 +225,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuoteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -202,8 +242,10 @@ const rootRouteChildren: RootRouteChildren = {
   GalleryRoute: GalleryRoute,
   HowItWorksRoute: HowItWorksRoute,
   IndustriesRoute: IndustriesRoute,
+  PrivacyRoute: PrivacyRoute,
   ProductsRoute: ProductsRoute,
   QuoteRoute: QuoteRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

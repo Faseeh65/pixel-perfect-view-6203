@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { MessageCircle } from "lucide-react";
+import { z } from "zod";
 import { seo } from "@/lib/seo";
 import { site } from "@/data/site";
 import { products } from "@/data/products";
@@ -16,6 +17,21 @@ export const Route = createFileRoute("/quote")({
   component: Quote,
 });
 
+const quoteSchema = z.object({
+  name: z.string().trim().min(1, "Please enter your name.").max(100, "Name must be under 100 characters."),
+  business: z.string().trim().max(100, "Business name must be under 100 characters.").optional().default(""),
+  phone: z
+    .string()
+    .trim()
+    .min(7, "Please enter a valid phone number.")
+    .max(30, "Phone number must be under 30 characters.")
+    .regex(/^[\d\s\+\-\(\)]{7,30}$/, "Please enter a valid phone format."),
+  quantity: z.string().trim().max(20, "Quantity must be under 20 characters.").optional().default(""),
+  product: z.string().trim().min(1, "Please select a product."),
+  details: z.string().trim().max(1000, "Details must be under 1000 characters.").optional().default(""),
+  hp_website: z.string().max(0, "Bot submission blocked."),
+});
+
 function Quote() {
   const { product } = Route.useSearch();
   const [error, setError] = useState("");
@@ -24,30 +40,28 @@ function Quote() {
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const f = new FormData(e.currentTarget);
-    const get = (k: string) => String(f.get(k) ?? "").trim();
     
-    // SEC-4: Honeypot bot protection
-    if (get("hp_website")) return;
+    const parseResult = quoteSchema.safeParse({
+      name: f.get("name"),
+      business: f.get("business"),
+      phone: f.get("phone"),
+      quantity: f.get("quantity"),
+      product: f.get("product"),
+      details: f.get("details"),
+      hp_website: f.get("hp_website"),
+    });
 
-    // SEC-5: Validation and input bounds check
-    const name = get("name");
-    const phone = get("phone");
-    const selectedProd = get("product");
-
-    if (!name || !phone || !selectedProd) {
-      return setError("Please fill in your name, phone number, and select a product.");
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0]?.message ?? "Invalid input.";
+      return setError(firstError);
     }
 
-    const phoneRegex = /^[\d\s\+\-\(\)]{7,20}$/;
-    if (!phoneRegex.test(phone)) {
-      return setError("Please enter a valid phone number.");
-    }
-
+    const data = parseResult.data;
     setError("");
     setSubmitted(true);
 
-    const title = products.find((p) => p.slug === selectedProd)?.title ?? selectedProd;
-    const msg = `Hello Printzy, I would like a quote.\nName: ${name.slice(0, 100)}\nBusiness: ${get("business").slice(0, 100)}\nPhone: ${phone.slice(0, 30)}\nProduct: ${title}\nQuantity: ${get("quantity").slice(0, 20)}\nDetails: ${get("details").slice(0, 1000)}`;
+    const title = products.find((p) => p.slug === data.product)?.title ?? data.product;
+    const msg = `Hello Printzy, I would like a quote.\nName: ${data.name}\nBusiness: ${data.business}\nPhone: ${data.phone}\nProduct: ${title}\nQuantity: ${data.quantity}\nDetails: ${data.details}`;
     
     window.open(`https://wa.me/${site.whatsappNumber}?text=${encodeURIComponent(msg)}`, "_blank", "noopener");
   }
