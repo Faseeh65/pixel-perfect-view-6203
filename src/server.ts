@@ -63,12 +63,32 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+import { getClientIp, checkRateLimit, createRateLimitResponse } from "./lib/rate-limit";
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
+      const ip = getClientIp(request);
+      const url = new URL(request.url);
+
+      // Determine rate limit category (sensitive for quote/form POSTs or quote path)
+      const isSensitive = url.pathname.startsWith("/quote") && request.method !== "GET";
+      const category = isSensitive ? "sensitive" : "general";
+
+      const limitResult = checkRateLimit(ip, category);
+
+      if (!limitResult.success) {
+        return addSecurityHeaders(createRateLimitResponse(limitResult.resetAfterSeconds));
+      }
+
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return addSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
+      
+      const resWithHeaders = addSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
+      resWithHeaders.headers.set("X-RateLimit-Limit", String(limitResult.limit));
+      resWithHeaders.headers.set("X-RateLimit-Remaining", String(limitResult.remaining));
+      
+      return resWithHeaders;
     } catch (error) {
       console.error(error);
       return addSecurityHeaders(new Response(renderErrorPage(), {

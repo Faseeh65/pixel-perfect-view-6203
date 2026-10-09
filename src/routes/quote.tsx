@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { PageHero } from "@/components/site/sections";
+import { TurnstileCaptcha } from "@/components/site/TurnstileCaptcha";
 
 export const Route = createFileRoute("/quote")({
   validateSearch: (s: Record<string, unknown>) => ({ product: typeof s.product === "string" ? s.product : undefined }),
@@ -117,6 +118,7 @@ function Quote() {
               <Textarea id="details" name="details" rows={4} maxLength={1000} className="bg-card" />
             </div>
             {error && <p role="alert" className="text-sm font-medium text-destructive">{error}</p>}
+            <TurnstileCaptcha />
             <Button type="submit" size="lg" className="w-full"><MessageCircle />Send quote request via WhatsApp</Button>
             <p className="text-center text-sm">Prefer email? Write to <a href={`mailto:${site.email}`} className="font-medium text-secondary underline">{site.email}</a></p>
           </form>
