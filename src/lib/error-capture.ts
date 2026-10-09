@@ -53,13 +53,27 @@ function isErrorLike(value: unknown): value is Error {
 // unhandled-error logging, which this file cannot hook directly — are both
 // recorded for consumeLastCapturedError and expanded before serialization.
 const originalConsoleError = console.error.bind(console);
+let isLogging = false;
+
 console.error = (...args: unknown[]) => {
-  const expanded = args.map((arg) => {
-    if (!isErrorLike(arg)) return arg;
-    record(arg);
-    return describeError(arg);
-  });
-  originalConsoleError(...expanded);
+  if (isLogging) {
+    originalConsoleError(...args);
+    return;
+  }
+  isLogging = true;
+  try {
+    const expanded = args.map((arg) => {
+      if (!isErrorLike(arg)) return arg;
+      record(arg);
+      return describeError(arg);
+    });
+    originalConsoleError(...expanded);
+  } catch (err) {
+    originalConsoleError("Error inside console.error interceptor:", err);
+    originalConsoleError(...args);
+  } finally {
+    isLogging = false;
+  }
 };
 
 if (typeof globalThis.addEventListener === "function") {

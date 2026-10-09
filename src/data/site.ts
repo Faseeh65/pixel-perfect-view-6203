@@ -2,7 +2,7 @@
 export const site = {
   name: "Printzy",
   tagline: "Custom Packaging",
-  url: "https://id-preview--ac3e1ee8-dcc1-4380-97a0-aaa346fe1d86.lovable.app",
+  url: import.meta.env.VITE_SITE_URL ?? "https://printzy.pk",
   email: "sales.printzy@gmail.com",
   phoneDisplay: "0339 9091707",
   phoneIntl: "+92 339 9091707",
@@ -13,8 +13,9 @@ export const site = {
   about:
     "Printzy designs and prints custom packaging for brands, food chains and retailers. Premium print, low minimums, delivered nationwide.",
   social: {
-    instagram: "https://instagram.com/printzy", // PLACEHOLDER
-    facebook: "https://facebook.com/printzy", // PLACEHOLDER
+    // TODO: Replace with verified social media URLs before launch
+    instagram: "https://instagram.com/printzy.pk",
+    facebook: "https://facebook.com/printzy.pk",
   },
 };
 

@@ -72,6 +72,8 @@ export function Navbar() {
   );
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+
 export function Footer() {
   return (
     <footer className="bg-navy pb-24 text-navy-foreground md:pb-0">
@@ -86,6 +88,8 @@ export function Footer() {
         </div>
         <FooterCol title="Quick links">
           {navLinks.map((l) => <li key={l.to}><Link to={l.to} className="hover:underline">{l.label}</Link></li>)}
+          <li><Link to="/privacy" className="hover:underline">Privacy Policy</Link></li>
+          <li><Link to="/terms" className="hover:underline">Terms of Service</Link></li>
         </FooterCol>
         <FooterCol title="Products">
           {products.map((p) => <li key={p.slug}><Link to="/quote" search={{ product: p.slug }} className="hover:underline">{p.title}</Link></li>)}
@@ -97,7 +101,7 @@ export function Footer() {
         </FooterCol>
       </div>
       <div className="border-t border-navy-foreground/15">
-        <p className="container-site py-6 text-sm text-navy-foreground/80">© {new Date().getFullYear()} Printzy. All rights reserved.</p>
+        <p className="container-site py-6 text-sm text-navy-foreground/80">© {CURRENT_YEAR} Printzy. All rights reserved.</p>
       </div>
     </footer>
   );
@@ -106,7 +110,7 @@ export function Footer() {
 function FooterCol({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <h2 className="mb-4 text-base text-navy-foreground">{title}</h2>
+      <h3 className="mb-4 text-base font-semibold text-navy-foreground">{title}</h3>
       <ul className="space-y-2 text-sm text-navy-foreground/85">{children}</ul>
     </div>
   );

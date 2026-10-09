@@ -105,7 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           email: site.email,
           telephone: site.phoneIntl,
           areaServed: "PK",
-          sameAs: [site.social.instagram, site.social.facebook],
+          sameAs: [site.social.instagram, site.social.facebook].filter(Boolean),
         }),
       },
     ],

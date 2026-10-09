@@ -198,16 +198,37 @@ export function FeaturedWork() {
 export function Testimonials() {
   const [i, setI] = useState(0);
   const n = testimonials.length;
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "ArrowLeft") {
+      setI((i - 1 + n) % n);
+    } else if (e.key === "ArrowRight") {
+      setI((i + 1) % n);
+    }
+  };
+
   return (
     <section className="section-pad bg-accent">
       <div className="container-site">
         <SectionHeader eyebrow="Reviews" title="What clients say" />
-        <div className="mx-auto max-w-2xl" aria-roledescription="carousel">
+        <div 
+          tabIndex={0} 
+          onKeyDown={handleKeyDown} 
+          aria-label="Client testimonials carousel" 
+          role="region" 
+          className="mx-auto max-w-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl p-2"
+        >
           <div aria-live="polite"><TestimonialCard {...testimonials[i]} /></div>
           <div className="mt-6 flex items-center justify-center gap-3">
             <Button variant="ghost" size="icon" aria-label="Previous review" onClick={() => setI((i - 1 + n) % n)}><ChevronLeft /></Button>
             {testimonials.map((_, k) => (
-              <button key={k} aria-label={`Show review ${k + 1}`} onClick={() => setI(k)} className="flex size-11 items-center justify-center">
+              <button 
+                key={k} 
+                aria-label={`Show review ${k + 1}`} 
+                aria-current={k === i ? "true" : "false"}
+                onClick={() => setI(k)} 
+                className="flex size-11 items-center justify-center focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring rounded-full"
+              >
                 <span className={`block size-2.5 rounded-full ${k === i ? "bg-navy" : "bg-border"}`} />
               </button>
             ))}
@@ -220,8 +241,25 @@ export function Testimonials() {
 }
 
 export function FAQ() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqs.map((f) => ({
+      "@type": "Question",
+      "name": f.q,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": f.a,
+      },
+    })),
+  };
+
   return (
     <section className="section-pad">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
       <div className="container-site">
         <SectionHeader eyebrow="FAQ" title="Frequently asked questions" />
         <Accordion type="single" collapsible className="mx-auto max-w-3xl rounded-2xl bg-card px-6 shadow-soft">
