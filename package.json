@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vite build",
+    "build": "vite build && node scripts/copy-dist.mjs",
     "deploy:cloudflare": "npm run build && npx --yes wrangler@^4.36.0 deploy --config wrangler.jsonc",
     "analyze": "vite build",
     "build:dev": "vite build --mode development",
