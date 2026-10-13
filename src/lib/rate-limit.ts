@@ -1,28 +1,18 @@
-// Sliding window Rate Limiter for Nitro / SSR Server Layer
-
-type RateLimitRecord = {
-  count: number;
-  resetTime: number;
+export type RateLimitBinding = {
+  limit: (options: { key: string }) => Promise<{ success: boolean }>;
 };
 
-const store = new Map<string, RateLimitRecord>();
-
-// Periodically clean up expired keys to prevent memory leaks
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, record] of store.entries()) {
-    if (now > record.resetTime) {
-      store.delete(key);
-    }
-  }
-}, 30_000);
+export const RATE_LIMIT_CONFIGS = {
+  sensitive: { limit: 5, periodSeconds: 60 },
+  general: { limit: 60, periodSeconds: 60 },
+} as const;
 
 export function getClientIp(request: Request): string {
   const cfIp = request.headers.get("cf-connecting-ip");
   if (cfIp) return cfIp.trim();
 
   const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
+  if (forwarded) return forwarded.split(",")[0]?.trim() || "127.0.0.1";
 
   const realIp = request.headers.get("x-real-ip");
   if (realIp) return realIp.trim();
@@ -30,76 +20,40 @@ export function getClientIp(request: Request): string {
   return "127.0.0.1";
 }
 
-export type RateLimitConfig = {
-  windowMs: number;
-  maxRequests: number;
-};
-
-export const RATE_LIMIT_CONFIGS = {
-  // Sensitive endpoints (e.g. quote form submissions, auth routes): 5 requests / min per IP
-  sensitive: { windowMs: 60_000, maxRequests: 5 },
-  // General page & static API requests: 60 requests / min per IP
-  general: { windowMs: 60_000, maxRequests: 60 },
-};
-
-export function checkRateLimit(
+export async function checkRateLimit(
+  binding: RateLimitBinding,
   ip: string,
   category: keyof typeof RATE_LIMIT_CONFIGS = "general",
-): { success: boolean; limit: number; remaining: number; resetAfterSeconds: number } {
+): Promise<{ success: boolean; limit: number; periodSeconds: number }> {
   const config = RATE_LIMIT_CONFIGS[category];
-  const now = Date.now();
-  const key = `${category}:${ip}`;
+  const result = await binding.limit({ key: ip });
 
-  const record = store.get(key);
-
-  if (!record || now > record.resetTime) {
-    store.set(key, { count: 1, resetTime: now + config.windowMs });
-    return {
-      success: true,
-      limit: config.maxRequests,
-      remaining: config.maxRequests - 1,
-      resetAfterSeconds: Math.ceil(config.windowMs / 1000),
-    };
-  }
-
-  if (record.count >= config.maxRequests) {
-    const resetAfterSeconds = Math.max(1, Math.ceil((record.resetTime - now) / 1000));
-    return {
-      success: false,
-      limit: config.maxRequests,
-      remaining: 0,
-      resetAfterSeconds,
-    };
-  }
-
-  record.count += 1;
-  const resetAfterSeconds = Math.max(1, Math.ceil((record.resetTime - now) / 1000));
   return {
-    success: true,
-    limit: config.maxRequests,
-    remaining: config.maxRequests - record.count,
-    resetAfterSeconds,
+    success: result.success,
+    limit: config.limit,
+    periodSeconds: config.periodSeconds,
   };
 }
 
-export function createRateLimitResponse(resetAfterSeconds: number): Response {
-  const html = `<!DOCTYPE html>
+export function createRateLimitResponse(limit: number, periodSeconds: number): Response {
+  const html = `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>429 Too Many Requests | Printzy</title>
   <style>
-    body { font-family: system-ui, -apple-system, sans-serif; background: #FAF7F2; color: #1F4E5F; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center; }
-    .card { background: white; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 480px; margin: 1rem; }
-    h1 { margin-top: 0; color: #1F4E5F; }
-    p { color: #555; line-height: 1.5; }
+    body { font: 15px/1.5 system-ui, -apple-system, sans-serif; background: #FAF7F2; color: #1F4E5F; display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 1rem; text-align: center; }
+    .card { background: white; padding: 2.5rem; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 30rem; }
+    h1 { margin-top: 0; }
+    p { color: #555; }
     .btn { display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: #1F4E5F; color: white; border-radius: 0.5rem; text-decoration: none; font-weight: 600; }
   </style>
 </head>
 <body>
   <div class="card">
     <h1>Too Many Requests</h1>
-    <p>You have made too many requests in a short period. Please wait <strong>${resetAfterSeconds} seconds</strong> before trying again.</p>
+    <p>Please wait up to <strong>${periodSeconds} seconds</strong> before trying again.</p>
     <a href="/" class="btn">Return to Home</a>
   </div>
 </body>
@@ -109,8 +63,9 @@ export function createRateLimitResponse(resetAfterSeconds: number): Response {
     status: 429,
     headers: {
       "Content-Type": "text/html; charset=utf-8",
-      "Retry-After": String(resetAfterSeconds),
-      "X-RateLimit-Limit": "60",
+      "Cache-Control": "no-store",
+      "Retry-After": String(periodSeconds),
+      "X-RateLimit-Limit": String(limit),
       "X-RateLimit-Remaining": "0",
     },
   });

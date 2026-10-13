@@ -24,3 +24,19 @@ cd <repository-name>
 npm i
 npm run dev
 ```
+
+## Frontend performance
+
+Route components are split automatically by TanStack Router. Run `npm run build` to
+build the app, or `npm run analyze` to build and emit a client bundle treemap at
+`.output/public/bundle-stats.html`.
+
+If you replace or add source photography in `src/assets`, run
+`npm run optimize:images` to regenerate the responsive WebP files in `public/images`
+before building.
+
+## Production deployment
+
+Cloudflare Workers is the recommended autoscaling deployment target; see the
+[deployment and scaling guide](./docs/deployment.md) for deployment, Supavisor
+pooling guidance, health checks, and the optional Docker/nginx path.

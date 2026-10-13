@@ -1,8 +1,10 @@
+import { getEnvConfig } from "@/lib/env";
+
 // Single source of truth for brand + contact details.
 export const site = {
   name: "Printzy",
   tagline: "Custom Packaging",
-  url: import.meta.env.VITE_SITE_URL ?? "https://printzy.pk",
+  url: getEnvConfig().siteUrl,
   email: "sales.printzy@gmail.com",
   phoneDisplay: "0339 9091707",
   phoneIntl: "+92 339 9091707",

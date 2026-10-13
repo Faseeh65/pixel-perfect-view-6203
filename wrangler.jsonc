@@ -1,0 +1,35 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "printzy",
+  "main": ".output/server/index.mjs",
+  "compatibility_date": "2026-10-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".output/public",
+    "binding": "ASSETS",
+  },
+  "placement": {
+    "mode": "smart",
+  },
+  "observability": {
+    "enabled": true,
+  },
+  "ratelimits": [
+    {
+      "name": "RATE_LIMIT_GENERAL",
+      "namespace_id": "76349281001",
+      "simple": {
+        "limit": 60,
+        "period": 60,
+      },
+    },
+    {
+      "name": "RATE_LIMIT_SENSITIVE",
+      "namespace_id": "76349281002",
+      "simple": {
+        "limit": 5,
+        "period": 60,
+      },
+    },
+  ],
+}
